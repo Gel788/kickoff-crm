@@ -1,0 +1,10 @@
+{
+  "name": "Kickoff Matchday",
+  "short_name": "Kickoff",
+  "description": "Операционная платформа футбольной лиги",
+  "start_url": "/referee",
+  "display": "standalone",
+  "background_color": "#06080a",
+  "theme_color": "#00e676",
+  "orientation": "portrait"
+}

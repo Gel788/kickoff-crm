@@ -1,0 +1,204 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #06080a;
+  --bg-elevated: #0e1216;
+  --bg-hover: #161c22;
+  --border: #1f2830;
+  --text: #f4f7fa;
+  --text-muted: #8b9aab;
+  --accent: #00e676;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-base font-sans text-[#f4f7fa] antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent/30 text-white;
+  }
+}
+
+@layer components {
+  .kickoff-input {
+    @apply w-full rounded-xl border border-border bg-base/80 px-4 py-2.5 text-sm text-white shadow-inner transition-all duration-200 placeholder:text-muted/60;
+    @apply focus:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent/15;
+  }
+
+  .kickoff-select {
+    @apply kickoff-input cursor-pointer appearance-none bg-[length:1rem] bg-[right_0.75rem_center] bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b9aab' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  .kickoff-textarea {
+    @apply kickoff-input min-h-[88px] resize-y;
+  }
+
+  .kickoff-label {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted;
+  }
+
+  .kickoff-card {
+    @apply rounded-2xl border border-border/80 bg-elevated/90 shadow-card backdrop-blur-sm;
+  }
+
+  .kickoff-card-hover {
+    @apply kickoff-card transition-all duration-200 hover:border-accent/25 hover:shadow-glow;
+  }
+
+  .kickoff-section-title {
+    @apply font-display text-xl font-bold tracking-tight text-white;
+  }
+
+  .kickoff-table-wrap {
+    @apply overflow-hidden rounded-2xl border border-border/80 bg-elevated/90 shadow-card backdrop-blur-sm;
+  }
+
+  .kickoff-table {
+    @apply w-full text-left text-sm;
+  }
+
+  .kickoff-table thead {
+    @apply border-b border-border bg-base/50 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-muted;
+  }
+
+  .kickoff-table thead th {
+    @apply px-5 py-3.5;
+  }
+
+  .kickoff-table tbody tr {
+    @apply border-b border-border/40 transition-colors last:border-0;
+  }
+
+  .kickoff-table tbody tr:hover {
+    @apply bg-hover/50;
+  }
+
+  .kickoff-table tbody td {
+    @apply px-5 py-4;
+  }
+
+  .kickoff-filter-bar {
+    @apply mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border/60 bg-elevated/50 p-4 backdrop-blur-sm;
+  }
+
+  .kickoff-alert {
+    @apply rounded-2xl border p-6 backdrop-blur-sm;
+  }
+
+  .kickoff-alert-warning {
+    @apply kickoff-alert border-warning/30 bg-warning/5;
+  }
+
+  .kickoff-alert-danger {
+    @apply kickoff-alert border-danger/30 bg-danger/5;
+  }
+
+  .kickoff-alert-info {
+    @apply kickoff-alert border-info/30 bg-info/5;
+  }
+}
+
+@layer utilities {
+  .grid-pitch {
+    background-image:
+      linear-gradient(rgba(0, 230, 118, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 230, 118, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .gradient-hero {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 230, 118, 0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(61, 139, 253, 0.08), transparent);
+  }
+
+  .landing-aurora {
+    background:
+      radial-gradient(ellipse 100% 80% at 20% -30%, rgba(0, 230, 118, 0.12), transparent 50%),
+      radial-gradient(ellipse 70% 50% at 90% 10%, rgba(61, 139, 253, 0.08), transparent 45%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0, 230, 118, 0.05), transparent 50%);
+    animation: aurora-shift 12s ease-in-out infinite alternate;
+  }
+
+  .landing-vignette {
+    background: radial-gradient(
+      ellipse 120% 80% at 50% 50%,
+      transparent 30%,
+      rgba(6, 8, 10, 0.85) 100%
+    );
+  }
+
+  .landing-cta-glow {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 230, 118, 0.5),
+      rgba(61, 139, 253, 0.2),
+      rgba(0, 230, 118, 0.3)
+    );
+    background-size: 200% 200%;
+    animation: gradient-border 6s ease infinite;
+  }
+
+  .landing-scoreboard {
+    perspective: 1200px;
+  }
+
+  @keyframes aurora-shift {
+    0% {
+      opacity: 0.85;
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      opacity: 1;
+      filter: hue-rotate(8deg);
+    }
+  }
+
+  @keyframes gradient-border {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .app-atmosphere {
+    background:
+      radial-gradient(ellipse 120% 80% at 0% 0%, rgba(0, 230, 118, 0.06), transparent 50%),
+      radial-gradient(ellipse 80% 60% at 100% 20%, rgba(61, 139, 253, 0.04), transparent 45%);
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-white to-muted bg-clip-text text-transparent;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.45s ease-out forwards;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 0.55s ease-out 0.08s forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

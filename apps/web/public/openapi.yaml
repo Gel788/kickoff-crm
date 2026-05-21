@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: Kickoff API v1
+  version: 1.0.0
+  description: Публичное чтение по slug лиги. Запись — API-ключ Bearer ko_...
+servers:
+  - url: /api/v1
+paths:
+  /{slug}/standings:
+    get:
+      summary: Турнирная таблица
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/fixtures:
+    get:
+      summary: Список матчей
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/fixtures/{id}:
+    get:
+      summary: Матч и события
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/fixtures/{id}/squads:
+    get:
+      summary: Заявки (после lock)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/players:
+    get:
+      summary: Реестр игроков сезона
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/scorers:
+    get:
+      summary: Бомбардиры
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/live:
+    get:
+      summary: Live JSON (polling)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /{slug}/live/stream:
+    get:
+      summary: Live SSE
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: text/event-stream

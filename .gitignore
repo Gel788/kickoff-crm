@@ -1,0 +1,43 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+apps/web/build/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+apps/web/.env
+apps/web/.env.*
+
+# database (local dev)
+apps/web/prisma/dev.db
+apps/web/prisma/dev.db-journal
+*.db
+*.db-journal
+
+# uploads (local)
+apps/web/public/uploads/
+
+# testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
+*.tsbuildinfo
+apps/web/next-env.d.ts
+
+# IDE
+.idea/
+.vscode/

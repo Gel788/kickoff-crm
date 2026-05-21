@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kickoff
+      POSTGRES_PASSWORD: kickoff
+      POSTGRES_DB: kickoff
+    ports:
+      - "5432:5432"
+    volumes:
+      - kickoff_pg:/var/lib/postgresql/data
+
+volumes:
+  kickoff_pg:
