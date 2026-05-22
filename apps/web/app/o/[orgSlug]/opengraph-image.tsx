@@ -12,21 +12,30 @@ export default async function Image({
 }: {
   params: { orgSlug: string };
 }) {
-  const org = await prisma.organization.findUnique({
-    where: { slug: params.orgSlug },
-    include: { seasons: { where: { isActive: true }, take: 1 } },
-  });
-
-  const season = org?.seasons[0];
   let rows: { pos: number; name: string; pts: number }[] = [];
+  let orgName = "Лига";
+  let seasonName = "Турнирная таблица";
 
-  if (season) {
-    const { standings } = await getStandingsForSeason(season.id);
-    rows = standings.slice(0, 8).map((s, i) => ({
-      pos: i + 1,
-      name: s.clubName,
-      pts: s.points,
-    }));
+  try {
+    const org = await prisma.organization.findUnique({
+      where: { slug: params.orgSlug },
+      include: { seasons: { where: { isActive: true }, take: 1 } },
+    });
+
+    const season = org?.seasons[0];
+    if (org?.name) orgName = org.name;
+    if (season?.name) seasonName = season.name;
+
+    if (season) {
+      const { standings } = await getStandingsForSeason(season.id);
+      rows = standings.slice(0, 8).map((s, i) => ({
+        pos: i + 1,
+        name: s.clubName,
+        pts: s.points,
+      }));
+    }
+  } catch {
+    /* build/CI без БД — дефолтная картинка */
   }
 
   return new ImageResponse(
@@ -57,10 +66,10 @@ export default async function Image({
           </span>
         </div>
         <h1 style={{ fontSize: 52, fontWeight: 800, marginTop: 24, marginBottom: 8 }}>
-          {org?.name ?? "Лига"}
+          {orgName}
         </h1>
         <p style={{ fontSize: 22, color: "#8a9a8a", marginBottom: 32 }}>
-          {season?.name ?? "Турнирная таблица"}
+          {seasonName}
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
           {rows.length === 0 ? (

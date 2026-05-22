@@ -7,6 +7,7 @@
   NETLIFY_NEXT_PLUGIN_MONOREPO = "apps/web"
   # Prisma (путь относительно apps/web). В UI Netlify также задай SESSION_SECRET и NEXT_PUBLIC_APP_URL
   DATABASE_URL = "file:./prisma/dev.db"
+  NEXT_PUBLIC_APP_URL = "https://kickoff-crm.netlify.app"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

@@ -9,9 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
+    env:
+      DATABASE_URL: "file:./prisma/dev.db"
+      SESSION_SECRET: "ci-secret-minimum-32-characters-long"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,8 +21,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: package-lock.json
       - run: npm ci
-        working-directory: .
-      - run: npm run build
-        env:
-          DATABASE_URL: "file:./dev.db"
-          SESSION_SECRET: "ci-secret-minimum-32-characters-long"
+      - name: Prepare SQLite (schema + demo seed)
+        run: npm run db:setup --workspace=web
+      - name: Build Next.js app
+        run: npm run build --workspace=web
