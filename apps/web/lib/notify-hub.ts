@@ -1,4 +1,5 @@
 import { sendEmail } from "@/lib/email";
+import { notifyEmail } from "@/lib/emails/templates";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/db";
 import { Role } from "@prisma/client";
@@ -14,10 +15,13 @@ export async function notifyUser(
 ) {
   await createNotification(userId, title, body, link);
   if (email) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const mail = notifyEmail({ title, body, link, appUrl });
     await sendEmail({
       to: email,
-      subject: `[Kickoff] ${title}`,
-      text: `${body}${link ? `\n\n${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}${link}` : ""}`,
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
     });
   }
 }

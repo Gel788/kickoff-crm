@@ -1,6 +1,7 @@
 import { Button } from "@/components/kickoff/button";
 import { FlashBanner } from "@/components/kickoff/flash-banner";
 import { PageHeader } from "@/components/kickoff/page-header";
+import { StandaloneAppShell } from "@/components/kickoff/standalone-app-shell";
 import { Card, inputClass, labelClass } from "@/components/kickoff/ui";
 import {
   beginTwoFactorSetup,
@@ -37,11 +38,15 @@ export default async function AccountSettingsPage({
       : null;
 
   return (
-    <div className="min-h-screen bg-base p-8">
-      <PageHeader title="Аккаунт" description={session.email} />
+    <StandaloneAppShell title="Настройки аккаунта">
+      <PageHeader
+        label="Безопасность"
+        title="Аккаунт"
+        description={session.email}
+      />
       <FlashBanner flash={searchParams.flash} />
 
-      <Card className="max-w-md">
+      <Card className="max-w-lg">
         <h3 className="font-display font-bold">Двухфакторная аутентификация</h3>
         <p className="mt-2 text-sm text-muted">
           Статус: {user.twoFactorEnabled ? "включена" : "выключена"}
@@ -82,9 +87,12 @@ export default async function AccountSettingsPage({
         )}
       </Card>
 
-      <Link href="/league/dashboard" className="mt-6 inline-block text-sm text-accent hover:underline">
-        ← В кабинет
+      <Link
+        href="/league/dashboard"
+        className="mt-8 inline-flex text-sm font-medium text-accent hover:text-white"
+      >
+        ← В кабинет лиги
       </Link>
-    </div>
+    </StandaloneAppShell>
   );
 }

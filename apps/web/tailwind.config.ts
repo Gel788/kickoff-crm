@@ -34,6 +34,7 @@ const config: Config = {
       animation: {
         "pulse-live": "pulse-live 2s ease-in-out infinite",
         marquee: "marquee 40s linear infinite",
+        "marquee-slow": "marquee 55s linear infinite",
       },
       keyframes: {
         "pulse-live": {

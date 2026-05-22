@@ -1,3 +1,4 @@
+import { AnimatedNumber } from "@/components/kickoff/animated-number";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -7,23 +8,29 @@ export function StatCard({
   hint,
   icon: Icon,
   accent,
+  animate,
 }: {
   label: string;
   value: string | number;
   hint?: string;
   icon?: LucideIcon;
   accent?: boolean;
+  animate?: boolean;
 }) {
+  const numeric = typeof value === "number";
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/80 bg-elevated/90 p-6 shadow-card backdrop-blur-sm transition-all duration-200 hover:border-accent/20",
-        accent && "border-accent/35 shadow-glow",
+        "relative overflow-hidden rounded-2xl border border-white/[0.08] bg-elevated/80 p-6 shadow-card backdrop-blur-sm transition-all duration-200 hover:border-accent/25 hover:shadow-glow",
+        accent && "border-accent/30 shadow-glow",
       )}
     >
-      {accent && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent" />
-      )}
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
+          accent ? "via-accent/80" : "via-white/10",
+        )}
+      />
       <div className="mb-4 flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-muted">
           {label}
@@ -45,7 +52,7 @@ export function StatCard({
           accent && "text-accent",
         )}
       >
-        {value}
+        {animate && numeric ? <AnimatedNumber value={value} /> : value}
       </p>
       {hint && <p className="mt-2 text-xs text-muted">{hint}</p>}
     </div>

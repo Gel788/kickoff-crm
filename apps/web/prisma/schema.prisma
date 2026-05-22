@@ -92,6 +92,12 @@ enum RefereeSlot {
   FOURTH
 }
 
+enum MatchRsvpStatus {
+  GOING
+  NOT_GOING
+  MAYBE
+}
+
 enum MatchPhase {
   PRE_MATCH
   FIRST_HALF
@@ -346,6 +352,7 @@ model PlayerRegistration {
   disciplinary        DisciplinaryRecord[]
   disciplinaryCases   DisciplinaryCase[]
   seasonRoster        SeasonRosterEntry[]
+  matchRsvps        MatchRsvp[]
 
   @@unique([playerId, clubId, seasonId])
   @@index([seasonId, clubId])
@@ -395,6 +402,7 @@ model Fixture {
   signatures        MatchSignature[]
   disputes          Dispute[]
   checklist         FixtureChecklist?
+  matchRsvps        MatchRsvp[]
   createdAt         DateTime            @default(now())
 
   @@index([roundId])
@@ -403,6 +411,20 @@ model Fixture {
   @@index([homeClubId, scheduledAt])
   @@index([awayClubId, scheduledAt])
   @@index([homeClubId, awayClubId])
+}
+
+model MatchRsvp {
+  id             String          @id @default(cuid())
+  fixtureId      String
+  registrationId String
+  status         MatchRsvpStatus @default(GOING)
+  updatedAt      DateTime        @updatedAt
+  fixture        Fixture         @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  registration   PlayerRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@unique([fixtureId, registrationId])
+  @@index([fixtureId])
+  @@index([registrationId])
 }
 
 model FixtureChecklist {

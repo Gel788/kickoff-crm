@@ -4,7 +4,14 @@ import { DeleteButton } from "@/components/kickoff/confirm-form";
 import { FlashBanner } from "@/components/kickoff/flash-banner";
 import { PageHeader } from "@/components/kickoff/page-header";
 import { CalendarMatchForms } from "@/components/league/calendar-match-forms";
-import { Card, DataTable, selectClass } from "@/components/kickoff/ui";
+import {
+  FixtureMonthCalendar,
+  type CalendarFixtureItem,
+} from "@/components/league/fixture-month-calendar";
+import { FixtureFullCalendar } from "@/components/league/fixture-full-calendar";
+import { StatCard } from "@/components/kickoff/stat-card";
+import { Card, DataTable, FilterBar, selectClass } from "@/components/kickoff/ui";
+import { Calendar, Download, Radio } from "lucide-react";
 import { deleteFixture } from "@/lib/actions-crud";
 import { FIXTURE_STATUS_LABELS, fixtureStatusToBadge } from "@/lib/fixture-status";
 import { format } from "@/lib/format";
@@ -22,6 +29,7 @@ export default async function CalendarPage({
     round?: string;
     error?: string;
     flash?: string;
+    view?: string;
   };
 }) {
   const ctx = await getOrgContext();
@@ -67,6 +75,37 @@ export default async function CalendarPage({
     ? filtered
     : filtered.sort((a, b) => a.round.number - b.round.number || a.scheduledAt.getTime() - b.scheduledAt.getTime());
 
+  const view =
+    searchParams.view === "list"
+      ? "list"
+      : searchParams.view === "fc"
+        ? "fc"
+        : "month";
+  const exportQs = new URLSearchParams();
+  if (clubFilter) exportQs.set("club", clubFilter);
+  if (roundFilter != null) exportQs.set("round", String(roundFilter));
+  const exportSuffix = exportQs.toString() ? `&${exportQs}` : "";
+
+  const now = new Date();
+  const weekEnd = new Date(now);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  const thisWeek = fixtures.filter(
+    (f) => f.scheduledAt >= now && f.scheduledAt <= weekEnd,
+  );
+  const liveCount = fixtures.filter((f) => f.status === "LIVE").length;
+
+  const calItems: CalendarFixtureItem[] = filtered.map((f) => ({
+    id: f.id,
+    scheduledAt: f.scheduledAt.toISOString(),
+    homeShort: f.homeClub.shortName,
+    awayShort: f.awayClub.shortName,
+    status: f.status,
+  }));
+
+  const viewQs = new URLSearchParams();
+  if (clubFilter) viewQs.set("club", clubFilter);
+  if (roundFilter != null) viewQs.set("round", String(roundFilter));
+
   return (
     <>
       <PageHeader
@@ -77,6 +116,22 @@ export default async function CalendarPage({
 
       <FlashBanner code={searchParams.error} flash={searchParams.flash} />
 
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <StatCard label="Всего матчей" value={fixtures.length} icon={Calendar} />
+        <StatCard
+          label="На этой неделе"
+          value={thisWeek.length}
+          hint="ближайшие 7 дней"
+          icon={Calendar}
+        />
+        <StatCard
+          label="Live сейчас"
+          value={liveCount}
+          icon={Radio}
+          accent={liveCount > 0}
+        />
+      </div>
+
       <CalendarMatchForms
         seasonId={ctx.season.id}
         divisionId={division.id}
@@ -84,7 +139,58 @@ export default async function CalendarPage({
         clubs={clubs}
       />
 
-      <form method="get" className="kickoff-filter-bar mb-8 flex flex-wrap gap-3">
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <Link
+          href={`/league/calendar?${new URLSearchParams({ ...Object.fromEntries(viewQs), view: "month" }).toString()}`}
+        >
+          <Button size="sm" variant={view === "month" ? "primary" : "ghost"}>
+            Месяц
+          </Button>
+        </Link>
+        <Link
+          href={`/league/calendar?${new URLSearchParams({ ...Object.fromEntries(viewQs), view: "list" }).toString()}`}
+        >
+          <Button size="sm" variant={view === "list" ? "primary" : "ghost"}>
+            Список
+          </Button>
+        </Link>
+        <Link
+          href={`/league/calendar?${new URLSearchParams({ ...Object.fromEntries(viewQs), view: "fc" }).toString()}`}
+        >
+          <Button size="sm" variant={view === "fc" ? "primary" : "ghost"}>
+            Drag-календарь
+          </Button>
+        </Link>
+        <span className="mx-2 h-6 w-px bg-border" />
+        <a
+          href={`/api/league/calendar/export?format=ics${exportSuffix.replace(/^&/, "&")}`}
+        >
+          <Button size="sm" variant="outline">
+            <Download className="mr-1 inline h-3.5 w-3.5" />
+            iCal
+          </Button>
+        </a>
+        <a
+          href={`/api/league/calendar/export?format=csv${exportSuffix.replace(/^&/, "&")}`}
+        >
+          <Button size="sm" variant="outline">
+            <Download className="mr-1 inline h-3.5 w-3.5" />
+            CSV
+          </Button>
+        </a>
+        <a
+          href={`/api/v1/${ctx.org!.slug}/calendar.ics`}
+          target="_blank"
+          className="text-xs text-muted hover:text-accent"
+        >
+          Публичная подписка →
+        </a>
+        <span className="text-xs text-muted">· ? — горячие клавиши</span>
+      </div>
+
+      <FilterBar>
+      <form method="get" className="flex flex-wrap items-center gap-3">
+        <input type="hidden" name="view" value={view} />
         <select name="club" defaultValue={clubFilter} className={selectClass}>
           <option value="">Все клубы</option>
           {clubs.map((c) => (
@@ -110,8 +216,21 @@ export default async function CalendarPage({
           </Button>
         </Link>
       </form>
+      </FilterBar>
 
-      {roundFilter == null && (
+      {view === "month" && (
+        <div className="mb-8">
+          <FixtureMonthCalendar fixtures={calItems} />
+        </div>
+      )}
+
+      {view === "fc" && (
+        <div className="mb-8">
+          <FixtureFullCalendar fixtures={calItems} />
+        </div>
+      )}
+
+      {view === "list" && roundFilter == null && (
         <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {rounds.map((round) => {
             const roundFixtures = fixtures.filter(
@@ -137,6 +256,7 @@ export default async function CalendarPage({
         </div>
       )}
 
+      {view === "list" && (
       <DataTable>
           <thead>
             <tr>
@@ -211,6 +331,7 @@ export default async function CalendarPage({
             ))}
           </tbody>
       </DataTable>
+      )}
     </>
   );
 }

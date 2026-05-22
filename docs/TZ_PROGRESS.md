@@ -1,6 +1,6 @@
 # Прогресс по KICKOFF_SPEC
 
-Обновлено: 2026-05-21
+Обновлено: 2026-05-22
 
 ## Сводка
 
@@ -55,6 +55,48 @@
 | SAML SSO | Фаза 4 |
 | Нативные apps | Фаза 4 |
 
+### Интеграция OpenLeague / sunday-league (2026-05-22)
+
+- Календарь: месячный вид, iCal/CSV, публичный `/api/v1/{slug}/calendar.ics`, RSVP
+- Горячие клавиши лиги (`league-keyboard-shortcuts`)
+- WhatsApp-текст заявки + копирование (`/club`, карточка матча)
+- Дубликаты игроков через **fuse.js**
+- Статистика игрока, `/league/leaderboard`, графики на `/league/reports` (recharts)
+- QR на матче (протокол + live по slug org)
+- Embed таблицы: `/embed/{slug}/standings`, сниппет в отчётах
+- Кубок: `/league/cup` (сетка топ-8 из таблицы, без отдельной сетки в БД)
+
+### Волна 3 — open libs (2026-05-22)
+
+- **Форма** (W/D/L) в турнирной таблице
+- **Очные встречи** `/league/compare` (H2H)
+- **Балансировщик** `/league/tools` (snake draft, sunday-league)
+- **⌘K палитра** — fuse.js по страницам и клубам
+- **Embed бомбардиров** `/embed/{slug}/scorers`
+- **Спарклайн голов** на карточке игрока (recharts)
+- **Ссылка на матч** + переход в H2H с карточки матча
+
+### Лендинг + публичная лига (2026-05-22)
+
+- Главная `/`: живые данные демо-лиги, сетка «Open source → Kickoff», embed-превью, Before/After, ValueSplit
+- Публичный хаб `/o/demo`: таблица с формой, бомбардиры, iCal, live, API
+
+### Волна 4 — «всё из open libs» (2026-05-22)
+
+- **FullCalendar** — `/league/calendar?view=fc`, drag-and-drop → `rescheduleFixture`
+- **@tanstack/react-table** — игроки, лидерборд (сортировка, поиск)
+- **date-fns** — `lib/format.ts` (относительные даты)
+- **cmdk** + fuse — ⌘K палитра
+- **vaul** — мобильный drawer матчей в кабинете клуба
+- **@tanstack/react-query** — live-табло + кабинет лиги
+- **OG-картинка** — `/o/{slug}/opengraph-image` (next/og)
+- **HTML-письма** — `lib/emails/templates.ts`, Resend в notify + дедлайн заявок
+- **Magic link** — `/login` + `/api/auth/magic`
+- **lenis** — плавный скролл лендинга
+- **Кубок** — горизонтальная сетка QF → SF → финал
+
+**Отложено:** отдельные матчи кубка в БД, `next-intl`, Stripe, BullMQ, Radix UI kit.
+
 ### Закрыто в MVP-дожиме (2026-05-21)
 
 - Очки таблицы из `SeasonRegulation.rules` (победа/ничья/поражение)
@@ -68,8 +110,10 @@
 
 ```bash
 cd "/Users/albertgiloan/Desktop/Footbol crm /apps/web"
-npm run db:setup
-npm run db:uat    # опционально: +12 матчей UAT
+npm run db:setup   # сид + демо-статистика (голы, таблица, графики)
+# если экраны пустые после старого сида:
+npm run db:demo    # +18 закрытых матчей с событиями, без сброса аккаунтов
+npm run db:uat     # опционально: +12 матчей UAT
 npm run dev
 ```
 

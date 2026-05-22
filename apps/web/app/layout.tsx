@@ -1,3 +1,4 @@
+import { AppToaster } from "@/components/kickoff/app-toaster";
 import { PwaRegister } from "@/components/pwa-register";
 import type { Metadata } from "next";
 import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
@@ -39,6 +40,7 @@ export default function RootLayout({
         className={`${syne.variable} ${dmSans.variable} ${jetbrains.variable} min-h-screen`}
       >
         {children}
+        <AppToaster />
         <PwaRegister />
       </body>
     </html>

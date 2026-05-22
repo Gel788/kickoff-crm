@@ -1,6 +1,8 @@
 import { PageHeader } from "@/components/kickoff/page-header";
 import { StatCard } from "@/components/kickoff/stat-card";
 import { Card, DataTable } from "@/components/kickoff/ui";
+import { SeasonCharts } from "@/components/league/season-charts";
+import { getSeasonChartData } from "@/lib/player-stats";
 import { getOrgContext, getStandingsForSeason, getTopScorers } from "@/lib/queries";
 import { prisma } from "@/lib/db";
 import { FileBarChart, Trophy, Users } from "lucide-react";
@@ -11,7 +13,7 @@ export default async function ReportsPage() {
   const ctx = await getOrgContext();
   if (!ctx?.season) redirect("/league/seasons");
 
-  const [{ standings }, scorers, closed] = await Promise.all([
+  const [{ standings }, scorers, closed, chartData] = await Promise.all([
     getStandingsForSeason(ctx.season.id),
     getTopScorers(ctx.season.id, 10),
     prisma.fixture.count({
@@ -20,7 +22,10 @@ export default async function ReportsPage() {
         round: { division: { competition: { seasonId: ctx.season.id } } },
       },
     }),
+    getSeasonChartData(ctx.season.id),
   ]);
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   return (
     <>
@@ -79,6 +84,29 @@ export default async function ReportsPage() {
             Live-табло →
           </Link>
           <Link
+            href={`/embed/${ctx.org!.slug}/standings`}
+            target="_blank"
+            className="text-accent hover:underline"
+          >
+            Виджет таблицы (embed) →
+          </Link>
+          <Link
+            href={`/embed/${ctx.org!.slug}/scorers`}
+            target="_blank"
+            className="text-accent hover:underline"
+          >
+            Виджет бомбардиров (embed) →
+          </Link>
+          <Link href="/league/leaderboard" className="text-accent hover:underline">
+            Лидерборд →
+          </Link>
+          <code className="block w-full rounded bg-base px-2 py-1 text-xs text-muted">
+            {`<iframe src="${appUrl}/embed/${ctx.org!.slug}/standings" width="100%" height="400" />`}
+          </code>
+          <code className="block w-full rounded bg-base px-2 py-1 text-xs text-muted">
+            {`<iframe src="${appUrl}/embed/${ctx.org!.slug}/scorers" width="100%" height="320" />`}
+          </code>
+          <Link
             href={`/api/league/export-fifa?seasonId=${ctx.season.id}`}
             className="text-accent hover:underline"
           >
@@ -86,6 +114,13 @@ export default async function ReportsPage() {
           </Link>
         </div>
       </Card>
+
+      <section className="mb-10">
+        <h2 className="kickoff-section-title mb-4">Динамика сезона</h2>
+        <Card>
+          <SeasonCharts data={chartData} />
+        </Card>
+      </section>
 
       <section className="mb-10">
         <h2 className="kickoff-section-title mb-4">Турнирная таблица</h2>

@@ -1,16 +1,15 @@
 import { Button } from "@/components/kickoff/button";
 import { FlashBanner } from "@/components/kickoff/flash-banner";
 import { PageHeader } from "@/components/kickoff/page-header";
-import { RowActions } from "@/components/kickoff/row-actions";
+import { PlayersTable, type PlayerTableRow } from "@/components/league/players-table";
 import {
-  DataTable,
   EmptyState,
+  FilterBar,
   FormCard,
   inputClass,
   labelClass,
   selectClass,
 } from "@/components/kickoff/ui";
-import { deletePlayerRegistration } from "@/lib/actions-crud";
 import { addPlayerDocument, createPlayer } from "@/lib/actions-registry";
 import { Users } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -23,12 +22,6 @@ const STATUS_LABELS: Record<EligibilityStatus, string> = {
   ELIGIBLE: "Допущен",
   PENDING: "На проверке",
   SUSPENDED: "Отстранён",
-};
-
-const STATUS_CLASS: Record<EligibilityStatus, string> = {
-  ELIGIBLE: "text-accent",
-  PENDING: "text-warning",
-  SUSPENDED: "text-danger",
 };
 
 export default async function PlayersPage({
@@ -89,7 +82,8 @@ export default async function PlayersPage({
         hint={searchParams.hint}
       />
 
-      <form method="get" className="kickoff-filter-bar mb-8 flex flex-wrap items-center gap-3">
+      <FilterBar>
+      <form method="get" className="flex flex-wrap items-center gap-3">
         <input
           name="q"
           defaultValue={q}
@@ -113,6 +107,7 @@ export default async function PlayersPage({
           <Button type="button" size="sm" variant="ghost">Сброс</Button>
         </Link>
       </form>
+      </FilterBar>
 
       <div className="mb-10 grid gap-6 lg:grid-cols-2">
         <form action={createPlayer} className="space-y-3">
@@ -176,44 +171,19 @@ export default async function PlayersPage({
           description="Добавьте игрока формой выше или сбросьте фильтры"
         />
       ) : (
-        <DataTable>
-          <thead>
-            <tr>
-              <th>№</th>
-              <th>Игрок</th>
-              <th>Клуб</th>
-              <th>Док.</th>
-              <th>Допуск</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((r) => (
-              <tr key={r.id}>
-                <td className="font-mono">{r.shirtNumber ?? "—"}</td>
-                <td className="font-medium">
-                  {r.player.firstName} {r.player.lastName}
-                </td>
-                <td className="text-muted">{r.club.shortName}</td>
-                <td className="text-xs text-muted">
-                  {r.player.documents.length}
-                  {r.player.documents.some((d) => d.filePath) && " 📎"}
-                </td>
-                <td className={`font-medium ${STATUS_CLASS[r.eligibility]}`}>
-                  {STATUS_LABELS[r.eligibility]}
-                </td>
-                <td>
-                  <RowActions
-                    viewHref={`/league/players/${r.id}`}
-                    deleteAction={deletePlayerRegistration}
-                    deleteHidden={{ registrationId: r.id }}
-                    deleteMessage={`Удалить ${r.player.firstName} ${r.player.lastName} из сезона?`}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </DataTable>
+        <PlayersTable
+          rows={players.map(
+            (r): PlayerTableRow => ({
+              registrationId: r.id,
+              shirtNumber: r.shirtNumber,
+              name: `${r.player.firstName} ${r.player.lastName}`,
+              clubShort: r.club.shortName,
+              docsCount: r.player.documents.length,
+              hasFiles: r.player.documents.some((d) => d.filePath),
+              eligibility: r.eligibility,
+            }),
+          )}
+        />
       )}
     </>
   );

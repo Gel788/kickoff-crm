@@ -470,6 +470,9 @@ async function main() {
     },
   });
 
+  const { seedDemoStats } = await import("../scripts/seed-demo-stats");
+  await seedDemoStats(prisma);
+
   console.log("Seed OK — demo123 для всех:");
   console.log("  operator@kickoff.app  — лига");
   console.log("  referee@kickoff.app   — судья");

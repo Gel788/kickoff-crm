@@ -1,9 +1,14 @@
-import { MatchCard } from "@/components/kickoff/match-card";
+import {
+  TodayMatchesCarousel,
+  type TodayMatchItem,
+} from "@/components/league/today-matches-carousel";
+import { AppDashboardHero } from "@/components/kickoff/app-dashboard-hero";
 import { PageHeader } from "@/components/kickoff/page-header";
 import { RoleValuePanel } from "@/components/kickoff/role-value-panel";
 import { StatCard } from "@/components/kickoff/stat-card";
 import {
   AlertPanel,
+  DataTable,
   EmptyState,
   SectionTitle,
 } from "@/components/kickoff/ui";
@@ -33,10 +38,17 @@ export default async function LeagueDashboardPage() {
 
   return (
     <>
+      <AppDashboardHero
+        orgName={ctx.org?.name ?? "Лига"}
+        seasonName={ctx.season.name}
+        roundLabel={ctx.round?.name ?? undefined}
+        liveCount={stats.liveCount}
+      />
+
       <PageHeader
-        label="Кабинет лиги"
-        title="Дашборд"
-        description={`${ctx.round?.name ?? "Тур"} · ${format.date(new Date())} · всё, что нужно лиге на матчдень`}
+        label="Сводка"
+        title="Дашборд матчденя"
+        description={`${format.date(new Date())} · заявки, протоколы, алерты`}
       />
 
       <RoleValuePanel role="league" guideHref="/league/guide" />
@@ -48,21 +60,25 @@ export default async function LeagueDashboardPage() {
           hint={stats.liveCount ? `${stats.liveCount} live` : undefined}
           icon={Calendar}
           accent={stats.liveCount > 0}
+          animate
         />
         <StatCard
           label="Просроченные заявки"
           value={stats.overdueSquads}
           icon={AlertTriangle}
+          animate
         />
         <StatCard
           label="Протоколы на проверке"
           value={stats.protocolReview}
           icon={FileWarning}
+          animate
         />
         <StatCard
           label="Матчи закрыты (тур)"
           value={stats.roundClosed}
           icon={CheckCircle2}
+          animate
         />
         {stats.openDisputes > 0 && (
           <StatCard
@@ -70,6 +86,7 @@ export default async function LeagueDashboardPage() {
             value={stats.openDisputes}
             icon={AlertTriangle}
             accent
+            animate
           />
         )}
       </div>
@@ -83,24 +100,22 @@ export default async function LeagueDashboardPage() {
             description="Когда появятся игры в календаре, они отобразятся здесь"
           />
         ) : (
-          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-            {today.map((m) => (
-              <MatchCard
-                key={m.id}
-                home={m.homeClub.name}
-                away={m.awayClub.name}
-                score={
+          <TodayMatchesCarousel
+            matches={today.map(
+              (m): TodayMatchItem => ({
+                id: m.id,
+                home: m.homeClub.name,
+                away: m.awayClub.name,
+                score:
                   m.status === "LIVE" || m.status === "CLOSED"
                     ? `${m.homeScore} : ${m.awayScore}`
-                    : undefined
-                }
-                time={`Сегодня · ${format.time(m.scheduledAt)}`}
-                venue={m.venue ?? undefined}
-                status={fixtureStatusToBadge(m.status)}
-                href={`/league/fixtures/${m.id}`}
-              />
-            ))}
-          </div>
+                    : undefined,
+                time: `Сегодня · ${format.time(m.scheduledAt)}`,
+                venue: m.venue ?? undefined,
+                status: fixtureStatusToBadge(m.status),
+              }),
+            )}
+          />
         )}
       </section>
 
@@ -119,32 +134,28 @@ export default async function LeagueDashboardPage() {
             Нет закрытых матчей — таблица появится после закрытия игр
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-border bg-elevated">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-muted">
-                  <th className="px-4 py-3">#</th>
-                  <th className="px-4 py-3">Клуб</th>
-                  <th className="px-4 py-3 text-center">И</th>
-                  <th className="px-4 py-3 text-center text-accent">О</th>
+          <DataTable>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Клуб</th>
+                <th className="text-center">И</th>
+                <th className="text-center">О</th>
+              </tr>
+            </thead>
+            <tbody>
+              {miniStandings.map((row, i) => (
+                <tr key={row.clubId}>
+                  <td className="font-mono text-muted">{i + 1}</td>
+                  <td className="font-medium">{row.clubName}</td>
+                  <td className="text-center font-mono">{row.played}</td>
+                  <td className="text-center font-mono font-bold text-accent">
+                    {row.points}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {miniStandings.map((row, i) => (
-                  <tr key={row.clubId} className="border-b border-border/50">
-                    <td className="px-4 py-2 font-mono text-muted">{i + 1}</td>
-                    <td className="px-4 py-2 font-medium">{row.clubName}</td>
-                    <td className="px-4 py-2 text-center font-mono">
-                      {row.played}
-                    </td>
-                    <td className="px-4 py-2 text-center font-mono font-bold text-accent">
-                      {row.points}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </DataTable>
         )}
       </section>
 

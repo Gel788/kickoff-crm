@@ -9,6 +9,8 @@ import { LeagueCloseChecklist } from "@/components/league/league-close-checklist
 import { approveSquads, lockSquads, openSquads } from "@/lib/actions";
 import { ensureFixtureChecklist } from "@/lib/actions-match";
 import { getIneligibilityReason } from "@/lib/eligibility";
+import { FixtureQr } from "@/components/fixture/fixture-qr";
+import { ShareFixtureLink } from "@/components/fixture/share-fixture-link";
 import { RefereeSlotsPanel } from "@/components/fixture/referee-slots-panel";
 import { chiefAssignment } from "@/lib/referee-slots";
 import { getSession } from "@/lib/auth";
@@ -45,6 +47,16 @@ export default async function FixturePage({
 
   const session = await getSession();
   const canLeague = session ? canManageLeague(session.role) : false;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const orgSlug =
+    session?.orgSlug ??
+    (
+      await prisma.organization.findUnique({
+        where: { id: fixture.round.division.competition.season.organizationId },
+        select: { slug: true },
+      })
+    )?.slug ??
+    "demo";
   const seasonId = fixture.round.division.competition.season.id;
 
   const homeRegs = await prisma.playerRegistration.findMany({
@@ -99,11 +111,18 @@ export default async function FixturePage({
         title={`${fixture.homeClub.name} — ${fixture.awayClub.name}`}
         description={format.datetime(fixture.scheduledAt)}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Badge status={fixtureStatusToBadge(fixture.status)} />
           <span className="font-mono text-2xl font-bold text-accent">
             {fixture.homeScore} : {fixture.awayScore}
           </span>
+          <ShareFixtureLink url={`${appUrl}/league/fixtures/${fixture.id}`} />
+          <Link
+            href={`/league/compare?a=${fixture.homeClubId}&b=${fixture.awayClubId}`}
+            className="text-sm text-accent hover:underline"
+          >
+            Очные встречи
+          </Link>
         </div>
       </PageHeader>
 
@@ -178,6 +197,21 @@ export default async function FixturePage({
           ` · Главный: ${chiefAssignment(fixture.refereeAssignments)!.user.name}`}
       </p>
 
+      <div className="mb-8 flex flex-wrap gap-6">
+        <FixtureQr
+          url={`${appUrl}/referee/match/${fixture.id}`}
+          label="Судья: скан → матч"
+        />
+        <FixtureQr
+          url={`${appUrl}/live/${orgSlug}`}
+          label="Публичное live-табло"
+        />
+        <FixtureQr
+          url={`${appUrl}/league/fixtures/${fixture.id}`}
+          label="Карточка матча"
+        />
+      </div>
+
       {canLeague && (
         <RefereeSlotsPanel
           fixtureId={fixture.id}
@@ -226,6 +260,9 @@ export default async function FixturePage({
               fixtureId={fixture.id}
               clubId={fixture.homeClubId}
               clubName={fixture.homeClub.name}
+              opponentName={fixture.awayClub.name}
+              matchDatetime={format.datetime(fixture.scheduledAt)}
+              venue={fixture.venue}
               registrations={homeRegPayload}
               existingIds={homeSquad?.lines.map((l) => l.registrationId) ?? []}
               captainId={
@@ -238,6 +275,9 @@ export default async function FixturePage({
               fixtureId={fixture.id}
               clubId={fixture.awayClubId}
               clubName={fixture.awayClub.name}
+              opponentName={fixture.homeClub.name}
+              matchDatetime={format.datetime(fixture.scheduledAt)}
+              venue={fixture.venue}
               registrations={awayRegPayload}
               existingIds={awaySquad?.lines.map((l) => l.registrationId) ?? []}
               captainId={

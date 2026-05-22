@@ -45,8 +45,87 @@
     @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted;
   }
 
+  .app-main-shell {
+    background: linear-gradient(
+      165deg,
+      rgba(14, 18, 22, 0.92) 0%,
+      rgba(8, 12, 16, 0.88) 50%,
+      rgba(10, 14, 18, 0.9) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 24px 80px rgba(0, 0, 0, 0.35);
+  }
+
+  .app-dashboard-hero {
+    background: linear-gradient(
+      120deg,
+      rgba(0, 230, 118, 0.08) 0%,
+      rgba(14, 18, 22, 0.6) 40%,
+      rgba(61, 139, 253, 0.05) 100%
+    );
+  }
+
+  .app-page-header {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .app-quick-nav {
+    padding: 0.25rem 0;
+  }
+
+  .app-list-card {
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .kickoff-card,
+  .kickoff-card-hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .kickoff-table-wrap {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 12px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  .kickoff-filter-bar {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .portal-nav-bar {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      transparent 100%
+    );
+  }
+
+  .login-feature-card {
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .login-feature-card:hover {
+    border-color: rgba(0, 230, 118, 0.2);
+    background: rgba(0, 230, 118, 0.04);
+  }
+
+  .login-showcase-stats {
+    animation: fadeIn 0.8s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+
+  .app-sidebar {
+    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.25);
+  }
+
   .kickoff-card {
-    @apply rounded-2xl border border-border/80 bg-elevated/90 shadow-card backdrop-blur-sm;
+    @apply rounded-2xl border border-white/[0.08] bg-elevated/80 shadow-card backdrop-blur-sm;
   }
 
   .kickoff-card-hover {
@@ -151,6 +230,17 @@
     perspective: 1200px;
   }
 
+  .live-broadcast-card {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 71, 87, 0.35),
+      rgba(0, 230, 118, 0.15),
+      rgba(255, 71, 87, 0.2)
+    );
+    background-size: 200% 200%;
+    animation: gradient-border 8s ease infinite;
+  }
+
   @keyframes aurora-shift {
     0% {
       opacity: 0.85;
@@ -200,5 +290,244 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Landing — стадион / мяч (Lottie + CSS, в духе LottieFiles / Framer) */
+  .landing-spotlight {
+    position: absolute;
+    width: 70vmax;
+    height: 70vmax;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    animation: spotlight-sweep 14s ease-in-out infinite;
+  }
+
+  .landing-spotlight-a {
+    top: -20%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.25), transparent 70%);
+  }
+
+  .landing-spotlight-b {
+    bottom: -30%;
+    right: -15%;
+    background: radial-gradient(circle, rgba(61, 139, 253, 0.2), transparent 70%);
+    animation-delay: -7s;
+  }
+
+  @keyframes spotlight-sweep {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translate(8%, 5%) scale(1.08);
+      opacity: 0.45;
+    }
+  }
+
+  .landing-ball {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      #fff 0%,
+      #e8e8e8 25%,
+      #1a1a1a 26%,
+      #1a1a1a 100%
+    );
+    box-shadow:
+      inset -4px -4px 12px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(0, 0, 0, 0.35);
+    opacity: 0.12;
+  }
+
+  .landing-ball-1 {
+    width: 120px;
+    height: 120px;
+    top: 12%;
+    right: 8%;
+    animation: ball-drift-a 18s ease-in-out infinite;
+  }
+
+  .landing-ball-2 {
+    width: 64px;
+    height: 64px;
+    bottom: 28%;
+    left: 6%;
+    animation: ball-drift-b 22s ease-in-out infinite;
+  }
+
+  .landing-ball-3 {
+    width: 40px;
+    height: 40px;
+    top: 55%;
+    right: 22%;
+    animation: ball-drift-c 12s ease-in-out infinite;
+  }
+
+  @keyframes ball-drift-a {
+    0%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    33% {
+      transform: translate(-30px, 40px) rotate(120deg);
+    }
+    66% {
+      transform: translate(20px, -20px) rotate(240deg);
+    }
+  }
+
+  @keyframes ball-drift-b {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(50px, -30px) rotate(180deg);
+    }
+  }
+
+  @keyframes ball-drift-c {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-24px);
+    }
+  }
+
+  .landing-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(0, 230, 118, 0.5);
+    animation: particle-float ease-in-out infinite;
+  }
+
+  @keyframes particle-float {
+    0%,
+    100% {
+      opacity: 0.2;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateY(-20px) scale(1.2);
+    }
+  }
+
+  .landing-floating-ball {
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 28% 28%,
+      #fff 0%,
+      #ddd 30%,
+      #222 32%,
+      #111 100%
+    );
+    box-shadow:
+      0 0 30px rgba(0, 230, 118, 0.4),
+      inset -3px -3px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .landing-goal-flash {
+    animation: goal-flash 9.6s ease-in-out infinite;
+  }
+
+  @keyframes goal-flash {
+    0%,
+    88%,
+    100% {
+      box-shadow: inset 0 0 0 transparent;
+    }
+    90%,
+    94% {
+      box-shadow: inset 0 0 80px rgba(0, 230, 118, 0.15);
+    }
+  }
+
+  .landing-pitch-lines {
+    background-image:
+      linear-gradient(90deg, transparent 49.5%, rgba(0, 230, 118, 0.08) 49.5%, rgba(0, 230, 118, 0.08) 50.5%, transparent 50.5%),
+      radial-gradient(ellipse 45% 35% at 50% 50%, transparent 60%, rgba(0, 230, 118, 0.06) 61%, rgba(0, 230, 118, 0.06) 62%, transparent 63%);
+    animation: pitch-pulse 6s ease-in-out infinite;
+  }
+
+  @keyframes pitch-pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .fixture-fc-wrap .fc {
+    font-size: 0.85rem;
+  }
+
+  .fixture-fc-wrap .fc .fc-scrollgrid,
+  .fixture-fc-wrap .fc .fc-scrollgrid table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .fixture-fc-wrap .fc .fc-daygrid-day {
+    min-height: 5rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .fixture-fc-wrap .fc .fc-toolbar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .fixture-fc-wrap .fc .fc-button {
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .fixture-fc-wrap .fc {
+    --fc-border-color: rgba(255, 255, 255, 0.08);
+    --fc-button-bg-color: rgba(0, 230, 118, 0.12);
+    --fc-button-border-color: rgba(0, 230, 118, 0.25);
+    --fc-button-text-color: #00e676;
+    --fc-button-hover-bg-color: rgba(0, 230, 118, 0.2);
+    --fc-today-bg-color: rgba(0, 230, 118, 0.08);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(255, 255, 255, 0.03);
+    color: #c8d0c8;
+  }
+
+  .fixture-fc-wrap .fc .fc-col-header-cell-cushion,
+  .fixture-fc-wrap .fc .fc-daygrid-day-number {
+    color: #8a9a8a;
+    font-size: 0.75rem;
+  }
+
+  .fixture-fc-wrap .fc-event {
+    cursor: grab;
+    font-size: 0.7rem;
+    border-radius: 6px;
+  }
+
+  .fixture-fc-wrap .fc-event:active {
+    cursor: grabbing;
+  }
+
+  [cmdk-group-heading] {
+    padding: 0.5rem 1rem 0.25rem;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted, #6a7a6a);
   }
 }

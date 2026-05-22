@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@/components/kickoff/button";
+import { CopyWhatsAppButton } from "@/components/club/copy-whatsapp-button";
 import { saveSquad, submitSquad } from "@/lib/actions";
+import { formatSquadWhatsApp } from "@/lib/whatsapp-squad";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Reg = {
   id: string;
@@ -22,6 +24,9 @@ export function SquadPicker({
   captainId: initialCaptain,
   status,
   rejectReason,
+  opponentName,
+  matchDatetime,
+  venue,
 }: {
   fixtureId: string;
   clubId: string;
@@ -31,11 +36,32 @@ export function SquadPicker({
   captainId?: string;
   status: string;
   rejectReason?: string | null;
+  opponentName: string;
+  matchDatetime: string;
+  venue?: string | null;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>(existingIds);
   const [captain, setCaptain] = useState(initialCaptain ?? "");
   const locked = status === "LOCKED" || status === "APPROVED";
+
+  const whatsappText = useMemo(() => {
+    const players = selected.map((id, i) => {
+      const r = registrations.find((x) => x.id === id)!;
+      return {
+        name: r.name,
+        number: r.number,
+        isStarter: i < 11,
+      };
+    });
+    return formatSquadWhatsApp({
+      clubName,
+      opponent: opponentName,
+      datetime: matchDatetime,
+      venue,
+      players,
+    });
+  }, [selected, registrations, clubName, opponentName, matchDatetime, venue]);
 
   function toggle(id: string) {
     if (locked) return;
@@ -108,7 +134,10 @@ export function SquadPicker({
             </select>
           </label>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
+            {selected.length >= 7 && (
+              <CopyWhatsAppButton text={whatsappText} />
+            )}
             <Button
               type="button"
               variant="outline"

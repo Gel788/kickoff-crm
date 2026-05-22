@@ -1,6 +1,9 @@
 import { Button } from "@/components/kickoff/button";
 import { PageHeader } from "@/components/kickoff/page-header";
+import { StandaloneAppShell } from "@/components/kickoff/standalone-app-shell";
+import { StatCard } from "@/components/kickoff/stat-card";
 import { DataTable, FormCard, inputClass, selectClass } from "@/components/kickoff/ui";
+import { Building2, Users } from "lucide-react";
 import { updateOrganizationPlan } from "@/lib/actions-billing";
 import {
   createOrganization,
@@ -25,13 +28,22 @@ export default async function PlatformPage() {
     },
   });
 
+  const totalClubs = orgs.reduce((s, o) => s + o._count.clubs, 0);
+  const totalSeasons = orgs.reduce((s, o) => s + o._count.seasons, 0);
+
   return (
-    <div className="min-h-screen bg-base p-8">
+    <StandaloneAppShell title="Kickoff Platform">
       <PageHeader
         label="Platform"
         title="Админ платформы"
-        description="SaaS: организации, планы, лимиты"
+        description="SaaS: организации, планы pilot / pro / enterprise"
       />
+
+      <div className="mb-10 grid gap-4 sm:grid-cols-3">
+        <StatCard label="Организаций" value={orgs.length} icon={Building2} animate />
+        <StatCard label="Сезонов" value={totalSeasons} icon={Users} animate />
+        <StatCard label="Клубов" value={totalClubs} icon={Building2} animate />
+      </div>
 
       <form action={createOrganization} className="mb-8 max-w-md">
         <FormCard title="Новая лига">
@@ -98,6 +110,6 @@ export default async function PlatformPage() {
           </FormCard>
         </form>
       )}
-    </div>
+    </StandaloneAppShell>
   );
 }

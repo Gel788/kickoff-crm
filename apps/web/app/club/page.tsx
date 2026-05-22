@@ -1,8 +1,11 @@
 import { Button } from "@/components/kickoff/button";
 import { MatchCard } from "@/components/kickoff/match-card";
 import { PageHeader } from "@/components/kickoff/page-header";
-import { RoleValuePanel } from "@/components/kickoff/role-value-panel";
 import { StatCard } from "@/components/kickoff/stat-card";
+import { ClubWelcomeStrip } from "@/components/club/club-welcome-strip";
+import { FixtureQuickDrawer } from "@/components/club/fixture-quick-drawer";
+import { MatchCountdown } from "@/components/club/match-countdown";
+import { MatchRsvpPanel } from "@/components/club/match-rsvp-panel";
 import { SquadPicker } from "@/components/club/squad-picker";
 import { fixtureStatusToBadge } from "@/lib/fixture-status";
 import { getIneligibilityReason } from "@/lib/eligibility";
@@ -65,6 +68,13 @@ export default async function ClubPage() {
     ]);
 
   const openFixture = openFixtures[0];
+
+  const rsvpRows = openFixture
+    ? await prisma.matchRsvp.findMany({
+        where: { fixtureId: openFixture.id },
+      })
+    : [];
+  const rsvpByReg = new Map(rsvpRows.map((r) => [r.registrationId, r.status]));
   const eligibleCount = registrations.filter(
     (r) => r.eligibility === "ELIGIBLE",
   ).length;
@@ -85,13 +95,17 @@ export default async function ClubPage() {
 
   return (
     <>
-      <PageHeader
-        label="Кабинет клуба"
-        title={club?.name ?? "Клуб"}
-        description={`${season.name} · заявки и протокол без звонков в лигу`}
+      <ClubWelcomeStrip
+        clubName={club?.name ?? "Клуб"}
+        seasonName={season.name}
+        openSquad={!!openFixture}
       />
 
-      <RoleValuePanel role="club" guideHref="/club/guide" />
+      <PageHeader
+        label="Матчдень"
+        title="Кабинет клуба"
+        description="Заявки, RSVP, календарь — без звонков в лигу"
+      />
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <StatCard
@@ -99,16 +113,19 @@ export default async function ClubPage() {
           value={rosterCount}
           hint={`макс. ${season.maxSquadSize}`}
           icon={ClipboardList}
+          animate
         />
         <StatCard
           label="Допущено"
           value={eligibleCount}
           icon={Users}
+          animate
         />
         <StatCard
           label="Матчей"
           value={allFixtures.length}
           icon={Calendar}
+          animate
         />
       </div>
 
@@ -135,10 +152,29 @@ export default async function ClubPage() {
               : openFixture.homeClub.name}{" "}
             · {format.datetime(openFixture.scheduledAt)}
           </p>
+          <div className="mb-6 max-w-xs">
+            <MatchCountdown targetIso={openFixture.scheduledAt.toISOString()} />
+          </div>
+          <MatchRsvpPanel
+            fixtureId={openFixture.id}
+            players={registrations.map((r) => ({
+              registrationId: r.id,
+              name: `${r.player.firstName} ${r.player.lastName}`,
+              number: r.shirtNumber,
+              status: rsvpByReg.get(r.id) ?? null,
+            }))}
+          />
           <SquadPicker
             fixtureId={openFixture.id}
             clubId={session.clubId}
             clubName={club?.name ?? ""}
+            opponentName={
+              openFixture.homeClubId === session.clubId
+                ? openFixture.awayClub.name
+                : openFixture.homeClub.name
+            }
+            matchDatetime={format.datetime(openFixture.scheduledAt)}
+            venue={openFixture.venue}
             registrations={regPayload}
             existingIds={
               openFixture.squads[0]?.lines.map((l) => l.registrationId) ?? []
@@ -159,6 +195,16 @@ export default async function ClubPage() {
 
       <section>
         <h2 className="mb-4 font-display text-lg font-bold">Календарь клуба</h2>
+        <FixtureQuickDrawer
+          fixtures={allFixtures.map((f) => ({
+            id: f.id,
+            home: f.homeClub.shortName,
+            away: f.awayClub.shortName,
+            scheduledAt: f.scheduledAt.toISOString(),
+            status: f.status,
+            venue: f.venue,
+          }))}
+        />
         <div className="grid gap-4">
           {allFixtures.length === 0 ? (
             <p className="text-muted">Матчей нет</p>

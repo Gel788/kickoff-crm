@@ -1,7 +1,11 @@
 import { Button } from "@/components/kickoff/button";
+import { AppSection } from "@/components/kickoff/app-section";
 import { PageHeader } from "@/components/kickoff/page-header";
-import { PortalHeader } from "@/components/kickoff/portal-header";
+import { PortalNav } from "@/components/kickoff/portal-nav";
+import { PortalShell } from "@/components/kickoff/portal-shell";
+import { PortalWelcomeStrip } from "@/components/kickoff/portal-welcome-strip";
 import { Card, EmptyState } from "@/components/kickoff/ui";
+import { Heart } from "lucide-react";
 import { recordGuardianConsent } from "@/lib/actions-guardian";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -49,29 +53,60 @@ export default async function GuardianPage() {
 
   const consentStaleMs = 365 * 24 * 60 * 60 * 1000;
 
-  return (
-    <div className="relative min-h-screen bg-base">
-      <div className="pointer-events-none fixed inset-0 grid-pitch opacity-[0.2]" />
-      <PortalHeader subtitle="Опекун" nav={[{ href: "/guardian", label: "Мои дети" }]} />
-      <div className="relative mx-auto max-w-2xl animate-fade-in px-6 py-10">
-        <PageHeader
-          title="Мои дети"
-          description="Согласие на обработку данных несовершеннолетних (фаза 1b)"
-        />
+  const [org, season] = await Promise.all([
+    prisma.organization.findUnique({
+      where: { id: session.organizationId },
+      select: { slug: true, name: true },
+    }),
+    prisma.season.findFirst({
+      where: { organizationId: session.organizationId, isActive: true },
+      select: { name: true },
+    }),
+  ]);
 
-        {upcomingFixtures.length > 0 && (
-          <Card className="mb-8">
-            <h3 className="font-display font-bold">Ближайшие матчи</h3>
-            <ul className="mt-4 space-y-2 text-sm">
+  return (
+    <PortalShell
+      orgSlug={org?.slug}
+      portal="guardian"
+      orgName={org?.name}
+      seasonName={season?.name}
+    >
+      <PortalNav subtitle="Опекун" nav={[{ href: "/guardian", label: "Мои дети" }]} />
+
+      <PortalWelcomeStrip
+        label="Опекун"
+        title="Мои дети"
+        description="Согласие на участие несовершеннолетних и ближайшие матчи клуба."
+        icon={Heart}
+      />
+
+      <PageHeader
+        label="Реестр"
+        title="Привязанные игроки"
+        description={`${links.length} ребёнок(ей) · GDPR / согласие`}
+      />
+
+      {upcomingFixtures.length > 0 && (
+        <AppSection title="Ближайшие матчи">
+          <Card>
+            <ul className="space-y-2 text-sm">
               {upcomingFixtures.map((f) => (
-                <li key={f.id} className="rounded-lg bg-base/50 px-3 py-2">
-                  {f.homeClub.shortName} — {f.awayClub.shortName} ·{" "}
-                  {format.datetime(f.scheduledAt)} · {f.status}
+                <li
+                  key={f.id}
+                  className="app-list-card rounded-xl border border-border/60 bg-base/50 px-4 py-3"
+                >
+                  <span className="font-medium">
+                    {f.homeClub.shortName} — {f.awayClub.shortName}
+                  </span>
+                  <span className="mt-1 block font-mono text-xs text-muted">
+                    {format.datetime(f.scheduledAt)} · {f.status}
+                  </span>
                 </li>
               ))}
             </ul>
           </Card>
-        )}
+        </AppSection>
+      )}
 
         {links.length === 0 ? (
           <EmptyState
@@ -131,7 +166,6 @@ export default async function GuardianPage() {
             );
           })
         )}
-      </div>
-    </div>
+    </PortalShell>
   );
 }

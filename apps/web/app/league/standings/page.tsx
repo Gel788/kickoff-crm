@@ -1,6 +1,10 @@
 import { PageHeader } from "@/components/kickoff/page-header";
 import { Button } from "@/components/kickoff/button";
 import { Card, DataTable } from "@/components/kickoff/ui";
+import { ExportStandingsPng } from "@/components/league/export-standings-png";
+import { FormBadges } from "@/components/league/form-badges";
+import { CopyShareButton } from "@/components/kickoff/copy-share-button";
+import { getClubFormMap } from "@/lib/form-guide";
 import {
   getCardStatsForSeason,
   getOrgContext,
@@ -22,10 +26,11 @@ export default async function StandingsPage({
   const divisionId = searchParams.division || undefined;
   const divisions = await getSeasonDivisions(ctx.season.id);
 
-  const [{ standings, points }, scorers, cards] = await Promise.all([
+  const [{ standings, points }, scorers, cards, formMap] = await Promise.all([
     getStandingsForSeason(ctx.season.id, divisionId),
     getTopScorers(ctx.season.id),
     getCardStatsForSeason(ctx.season.id, divisionId),
+    getClubFormMap(ctx.season.id, divisionId),
   ]);
 
   const divisionLabel =
@@ -37,7 +42,16 @@ export default async function StandingsPage({
         label="Статистика"
         title="Турнирная таблица"
         description={`${divisionLabel} · очки: победа ${points.win}, ничья ${points.draw}, поражение ${points.loss}`}
-      />
+      >
+        <div className="flex flex-wrap gap-2">
+          <ExportStandingsPng targetId="standings-export" />
+          <CopyShareButton
+            url={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/embed/${ctx.org?.slug ?? "demo"}/standings`}
+            title="Таблица Kickoff"
+            label="Поделиться"
+          />
+        </div>
+      </PageHeader>
 
       {divisions.length > 1 && (
         <div className="mb-8 flex flex-wrap gap-2">
@@ -60,7 +74,7 @@ export default async function StandingsPage({
       )}
 
       <div className="grid gap-8 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2" id="standings-export">
           <DataTable>
             <thead>
               <tr>
@@ -72,6 +86,7 @@ export default async function StandingsPage({
                 <th className="text-center">П</th>
                 <th className="text-center">Мячи</th>
                 <th className="text-center">±</th>
+                <th className="text-center">Форма</th>
                 <th className="text-center text-accent">О</th>
               </tr>
             </thead>
@@ -88,6 +103,9 @@ export default async function StandingsPage({
                     {row.gf}:{row.ga}
                   </td>
                   <td className="text-center font-mono">{row.gd}</td>
+                  <td className="text-center">
+                    <FormBadges form={formMap.get(row.clubId) ?? []} />
+                  </td>
                   <td className="text-center font-mono font-bold text-accent">
                     {row.points}
                   </td>

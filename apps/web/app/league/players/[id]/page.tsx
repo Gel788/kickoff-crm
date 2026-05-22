@@ -14,6 +14,8 @@ import { prisma } from "@/lib/db";
 import { getOrgContext } from "@/lib/queries";
 import { EligibilityStatus } from "@prisma/client";
 import { format } from "@/lib/format";
+import { PlayerGoalSparkline } from "@/components/league/player-goal-sparkline";
+import { getPlayerSeasonStats } from "@/lib/player-stats";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -46,6 +48,7 @@ export default async function PlayerDetailPage({
 
   if (!reg) notFound();
 
+  const stats = await getPlayerSeasonStats(reg.id);
   const dob = reg.player.dateOfBirth.toISOString().slice(0, 10);
 
   return (
@@ -61,6 +64,53 @@ export default async function PlayerDetailPage({
           </Button>
         </Link>
       </PageHeader>
+
+      {stats && (
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <Card className="!p-4 text-center">
+            <p className="font-mono text-2xl font-bold text-accent">{stats.goals}</p>
+            <p className="text-xs text-muted">Голы</p>
+          </Card>
+          <Card className="!p-4 text-center">
+            <p className="font-mono text-2xl font-bold">{stats.appearances}</p>
+            <p className="text-xs text-muted">Матчи</p>
+          </Card>
+          <Card className="!p-4 text-center">
+            <p className="font-mono text-2xl font-bold">{stats.starts}</p>
+            <p className="text-xs text-muted">В старте</p>
+          </Card>
+          <Card className="!p-4 text-center">
+            <p className="font-mono text-2xl font-bold text-warning">{stats.yellow}</p>
+            <p className="text-xs text-muted">ЖК</p>
+          </Card>
+          <Card className="!p-4 text-center">
+            <p className="font-mono text-2xl font-bold text-danger">{stats.red}</p>
+            <p className="text-xs text-muted">КК</p>
+          </Card>
+        </div>
+      )}
+
+      {stats && stats.goalTimeline.length >= 2 && (
+        <Card className="mb-8">
+          <h3 className="font-display text-lg font-bold">Динамика голов</h3>
+          <div className="mt-4">
+            <PlayerGoalSparkline data={stats.goalTimeline} />
+          </div>
+        </Card>
+      )}
+
+      {stats && stats.recent.length > 0 && (
+        <Card className="mb-8">
+          <h3 className="font-display text-lg font-bold">Последние события</h3>
+          <ul className="mt-3 space-y-2 text-sm">
+            {stats.recent.map((e, i) => (
+              <li key={i} className="text-muted">
+                {format.date(e.date)} · {e.fixtureLabel} · {e.minute}&apos; · {e.type}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <div className="mb-8 grid gap-6 lg:grid-cols-2">
         <Card>

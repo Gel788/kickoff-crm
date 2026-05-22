@@ -15,12 +15,14 @@ export function Card({
   return (
     <div
       className={cn(
+        "app-list-card relative overflow-hidden",
         hover ? "kickoff-card-hover" : "kickoff-card",
         padding && "p-6",
         className,
       )}
     >
-      {children}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      <div className="relative">{children}</div>
     </div>
   );
 }
@@ -81,15 +83,17 @@ export function EmptyState({
   icon?: LucideIcon;
 }) {
   return (
-    <Card className="flex flex-col items-center justify-center py-16 text-center">
+    <Card className="flex flex-col items-center justify-center border-dashed border-white/10 py-20 text-center">
       {Icon && (
-        <div className="mb-4 rounded-2xl bg-accent-dim p-4">
-          <Icon className="h-8 w-8 text-accent" />
+        <div className="mb-5 rounded-2xl border border-accent/20 bg-accent-dim p-5 shadow-glow">
+          <Icon className="h-9 w-9 text-accent" />
         </div>
       )}
-      <p className="font-display text-lg font-semibold">{title}</p>
+      <p className="font-display text-xl font-bold">{title}</p>
       {description && (
-        <p className="mt-2 max-w-sm text-sm text-muted">{description}</p>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
+          {description}
+        </p>
       )}
     </Card>
   );

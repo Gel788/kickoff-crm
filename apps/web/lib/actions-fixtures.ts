@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { canManageLeague, requireSession } from "@/lib/auth";
+import { squadDeadlineEmail } from "@/lib/emails/templates";
+import { sendEmail } from "@/lib/email";
 import { notifyClubStaff } from "@/lib/notify-hub";
 import { FixtureStatus, SquadStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -78,6 +80,27 @@ export async function postponeFixture(formData: FormData) {
   revalidatePath(`/league/fixtures/${fixtureId}`);
   revalidatePath("/league/calendar");
   revalidatePath("/league/dashboard");
+}
+
+/** Перенос даты с FullCalendar (drag-and-drop) */
+export async function rescheduleFixture(fixtureId: string, scheduledAtIso: string) {
+  const session = await requireSession();
+  if (!canManageLeague(session.role)) throw new Error("FORBIDDEN");
+
+  const fixture = await prisma.fixture.findUnique({
+    where: { id: fixtureId },
+    include: { homeClub: true, awayClub: true },
+  });
+  if (!fixture) throw new Error("NOT_FOUND");
+  if (fixture.status === FixtureStatus.LIVE || fixture.status === FixtureStatus.CLOSED) {
+    throw new Error("LOCKED");
+  }
+
+  const fd = new FormData();
+  fd.set("fixtureId", fixtureId);
+  fd.set("scheduledAt", scheduledAtIso);
+  fd.set("reason", "Перенос с календаря");
+  await postponeFixture(fd);
 }
 
 export async function rejectSquad(formData: FormData) {
@@ -181,6 +204,15 @@ export async function sendSquadDeadlineReminders(seasonId: string) {
       (f.scheduledAt.getTime() - now.getTime()) / (1000 * 60 * 60);
     if (hoursLeft > season.squadDeadlineHours || hoursLeft < 0) continue;
 
+    const matchLabel = `${f.homeClub.shortName} — ${f.awayClub.shortName}`;
+    const hoursRounded = Math.round(hoursLeft);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const mail = squadDeadlineEmail({
+      matchLabel,
+      hoursLeft: hoursRounded,
+      appUrl,
+    });
+
     for (const clubId of [f.homeClubId, f.awayClubId]) {
       const squad = f.squads.find((s) => s.clubId === clubId);
       if (squad?.status === SquadStatus.SUBMITTED) continue;
@@ -188,9 +220,25 @@ export async function sendSquadDeadlineReminders(seasonId: string) {
         clubId,
         session.organizationId,
         "Дедлайн заявки",
-        `До матча ${f.homeClub.shortName}—${f.awayClub.shortName} осталось ${Math.round(hoursLeft)} ч. Подайте заявку.`,
+        `До матча ${matchLabel} осталось ${hoursRounded} ч. Подайте заявку.`,
         "/club",
       );
+      const staff = await prisma.membership.findMany({
+        where: {
+          clubId,
+          organizationId: session.organizationId,
+          role: { in: ["CLUB_COACH", "CLUB_ADMIN", "CLUB_DELEGATE"] },
+        },
+        include: { user: true },
+      });
+      for (const m of staff) {
+        await sendEmail({
+          to: m.user.email,
+          subject: mail.subject,
+          text: mail.text,
+          html: mail.html,
+        });
+      }
       sent++;
     }
   }

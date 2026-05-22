@@ -24,12 +24,14 @@ export function MatchCard({
     <Link
       href={href}
       className={cn(
-        "group block rounded-2xl border border-border/80 bg-elevated/90 p-6 shadow-card backdrop-blur-sm transition-all duration-200",
+        "app-list-card group relative block overflow-hidden rounded-2xl border border-border/80 bg-elevated/90 p-6 shadow-card backdrop-blur-sm transition-all duration-200",
         "hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-glow",
-        status === "live" && "border-danger/40 ring-1 ring-danger/20",
+        status === "live" &&
+          "border-danger/40 bg-gradient-to-br from-danger/10 to-elevated/90 ring-1 ring-danger/20",
       )}
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="relative mb-4 flex items-center justify-between">
         <Badge status={status} />
         <span className="font-mono text-xs text-muted">{time}</span>
       </div>

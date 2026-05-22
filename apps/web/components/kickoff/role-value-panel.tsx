@@ -101,7 +101,7 @@ export function RoleValuePanel({
       : "Заявки, состав и подпись протокола — без лишней переписки с лигой.";
 
   return (
-    <section className="mb-10 rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/10 via-elevated to-elevated p-6 md:p-8">
+    <section className="mb-10 overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/[0.12] via-[#0c1014] to-elevated/90 p-6 md:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const events = [
@@ -10,7 +11,9 @@ const events = [
 ];
 
 export function HeroScoreboard() {
+  const reduce = useReducedMotion();
   const [score, setScore] = useState({ home: 0, away: 0 });
+  const [goalPulse, setGoalPulse] = useState(false);
   const [visible, setVisible] = useState(0);
   const [phase, setPhase] = useState("2-й тайм");
   const [clock, setClock] = useState("67:12");
@@ -19,9 +22,19 @@ export function HeroScoreboard() {
     const t = setInterval(() => {
       setVisible((v) => {
         const next = v < events.length ? v + 1 : 0;
-        if (next === 1) setScore({ home: 1, away: 0 });
-        if (next === 2) setScore({ home: 1, away: 1 });
-        if (next === 4) setScore({ home: 2, away: 1 });
+        if (next === 1) {
+          setScore({ home: 1, away: 0 });
+          setGoalPulse(true);
+        }
+        if (next === 2) {
+          setScore({ home: 1, away: 1 });
+          setGoalPulse(true);
+        }
+        if (next === 4) {
+          setScore({ home: 2, away: 1 });
+          setGoalPulse(true);
+        }
+        if (next === 0) setGoalPulse(false);
         if (next === 0) {
           setScore({ home: 0, away: 0 });
           setPhase("1-й тайм");
@@ -37,6 +50,12 @@ export function HeroScoreboard() {
     }, 2400);
     return () => clearInterval(t);
   }, []);
+
+  useEffect(() => {
+    if (!goalPulse) return;
+    const t = setTimeout(() => setGoalPulse(false), 600);
+    return () => clearTimeout(t);
+  }, [goalPulse]);
 
   return (
     <div className="landing-scoreboard relative">
@@ -68,9 +87,15 @@ export function HeroScoreboard() {
               <p className="font-mono text-xs font-semibold tracking-widest text-muted">
                 DIN
               </p>
-              <p className="mt-2 font-mono text-[5.5rem] font-bold leading-none tracking-tighter text-white tabular-nums transition-all duration-700">
+              <motion.p
+                key={`h-${score.home}`}
+                className="mt-2 font-mono text-[5.5rem] font-bold leading-none tracking-tighter text-white tabular-nums"
+                initial={reduce ? false : { scale: 1.2, color: "#00e676" }}
+                animate={{ scale: 1, color: "#ffffff" }}
+                transition={{ type: "spring", stiffness: 400, damping: 18 }}
+              >
                 {score.home}
-              </p>
+              </motion.p>
             </div>
             <div className="pb-6 text-center">
               <p className="font-mono text-3xl font-light text-white/20">:</p>
@@ -80,9 +105,15 @@ export function HeroScoreboard() {
               <p className="font-mono text-xs font-semibold tracking-widest text-muted">
                 SPA
               </p>
-              <p className="mt-2 font-mono text-[5.5rem] font-bold leading-none tracking-tighter text-white tabular-nums transition-all duration-700">
+              <motion.p
+                key={`a-${score.away}`}
+                className="mt-2 font-mono text-[5.5rem] font-bold leading-none tracking-tighter text-white tabular-nums"
+                initial={reduce ? false : { scale: 1.2, color: "#00e676" }}
+                animate={{ scale: 1, color: "#ffffff" }}
+                transition={{ type: "spring", stiffness: 400, damping: 18 }}
+              >
                 {score.away}
-              </p>
+              </motion.p>
             </div>
           </div>
         </div>

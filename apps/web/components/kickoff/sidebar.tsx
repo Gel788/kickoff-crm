@@ -6,6 +6,7 @@ import {
   Bell,
   Calendar,
   CalendarRange,
+  Radio,
   FileBarChart,
   HelpCircle,
   LayoutDashboard,
@@ -17,6 +18,10 @@ import {
   Shield,
   TableProperties,
   Trophy,
+  Medal,
+  GitBranch,
+  GitCompare,
+  Wrench,
   UserCog,
   Users,
   type LucideIcon,
@@ -45,6 +50,10 @@ const groups: { title: string; items: NavItem[] }[] = [
     title: "Соревнование",
     items: [
       { href: "/league/standings", label: "Таблица", icon: TableProperties },
+      { href: "/league/leaderboard", label: "Лидерборд", icon: Medal },
+      { href: "/league/cup", label: "Кубок", icon: GitBranch },
+      { href: "/league/compare", label: "Очные", icon: GitCompare },
+      { href: "/league/tools", label: "Инструменты", icon: Wrench },
       { href: "/league/competitions", label: "Турниры", icon: Trophy },
       { href: "/league/seasons", label: "Сезоны", icon: CalendarRange },
       { href: "/league/regulations", label: "Регламент", icon: ScrollText },
@@ -71,32 +80,51 @@ const groups: { title: string; items: NavItem[] }[] = [
 
 const footerLink = { href: "/settings/account", label: "Аккаунт · 2FA", icon: UserCog };
 
+const matchdayExtras = (orgSlug: string): NavItem[] => [
+  {
+    href: `/live/${orgSlug}`,
+    label: "Live-табло",
+    icon: Radio,
+  },
+];
+
 export function Sidebar({
   orgName,
   seasonName,
+  orgSlug = "demo",
   userName,
   userEmail,
 }: {
   orgName: string;
   seasonName: string;
+  orgSlug?: string;
   userName: string;
   userEmail: string;
 }) {
   const pathname = usePathname();
 
+  const navGroups = groups.map((g) =>
+    g.title === "Матчдень"
+      ? { ...g, items: [...g.items, ...matchdayExtras(orgSlug)] }
+      : g,
+  );
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-[272px] flex-col border-r border-border/80 bg-elevated/95 backdrop-blur-xl">
-      <div className="border-b border-border/60 px-5 py-6">
+    <aside className="app-sidebar fixed inset-y-0 left-0 z-40 flex w-[272px] flex-col border-r border-white/[0.06] bg-[#0a0e12]/90 backdrop-blur-2xl">
+      <div className="border-b border-white/[0.06] px-5 py-6">
         <Logo />
-        <div className="mt-4 rounded-xl border border-border/60 bg-base/50 px-3 py-2.5">
-          <p className="truncate font-display text-sm font-semibold">{orgName}</p>
-          <p className="truncate font-mono text-[10px] uppercase tracking-widest text-accent">
+        <div className="mt-4 rounded-xl border border-accent/15 bg-gradient-to-br from-accent/10 to-base/40 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_8px_rgba(0,230,118,0.8)]" />
+            <p className="truncate font-display text-sm font-semibold">{orgName}</p>
+          </div>
+          <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-widest text-accent">
             {seasonName}
           </p>
         </div>
       </div>
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
-        {groups.map((group) => (
+        {navGroups.map((group) => (
           <div key={group.title}>
             <p className="mb-2 px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted/70">
               {group.title}

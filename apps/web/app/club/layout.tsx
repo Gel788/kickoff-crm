@@ -1,4 +1,5 @@
-import { PortalHeader } from "@/components/kickoff/portal-header";
+import { PortalNav } from "@/components/kickoff/portal-nav";
+import { PortalShell } from "@/components/kickoff/portal-shell";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
@@ -11,15 +12,27 @@ export default async function ClubLayout({
   const session = await getSession();
   if (!session?.clubId) redirect("/login");
 
-  const club = await prisma.club.findUnique({
-    where: { id: session.clubId },
-  });
+  const [club, org, season] = await Promise.all([
+    prisma.club.findUnique({ where: { id: session.clubId } }),
+    prisma.organization.findUnique({
+      where: { id: session.organizationId },
+      select: { slug: true, name: true },
+    }),
+    prisma.season.findFirst({
+      where: { organizationId: session.organizationId, isActive: true },
+      select: { name: true },
+    }),
+  ]);
 
   return (
-    <div className="relative min-h-screen bg-base">
-      <div className="pointer-events-none fixed inset-0 grid-pitch opacity-[0.25]" />
-      <div className="pointer-events-none fixed inset-0 app-atmosphere" />
-      <PortalHeader
+    <PortalShell
+      orgSlug={org?.slug}
+      portal="club"
+      wide
+      orgName={club?.name}
+      seasonName={season?.name}
+    >
+      <PortalNav
         subtitle={club?.name}
         nav={[
           { href: "/club", label: "Кабинет" },
@@ -28,9 +41,7 @@ export default async function ClubLayout({
           { href: "/club/delegate", label: "Протокол" },
         ]}
       />
-      <div className="relative mx-auto max-w-3xl animate-fade-in px-6 py-10">
-        {children}
-      </div>
-    </div>
+      {children}
+    </PortalShell>
   );
 }
