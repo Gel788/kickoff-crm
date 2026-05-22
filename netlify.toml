@@ -1,0 +1,12 @@
+# Kickoff CRM — monorepo (apps/web)
+[build]
+  command = "npm ci && npm run db:setup --workspace=web && npm run build --workspace=web"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NETLIFY_NEXT_PLUGIN_MONOREPO = "apps/web"
+  # Prisma (путь относительно apps/web). В UI Netlify также задай SESSION_SECRET и NEXT_PUBLIC_APP_URL
+  DATABASE_URL = "file:./prisma/dev.db"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

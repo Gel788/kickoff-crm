@@ -17,7 +17,7 @@ export function LandingHeroVisual() {
         className="relative z-10"
         initial={reduce ? false : { opacity: 0, y: 40, rotateX: 8 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
-        transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const }}
         style={{ transformPerspective: 1200 }}
       >
         <HeroScoreboard />
